@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": "^7.1.3",
-        "rumur/wputils/contracts": "0.0.*"
+        "rumur/wputils-contracts": "^0.1"
     },
     "autoload": {
         "psr-4": {
