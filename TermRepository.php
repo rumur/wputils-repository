@@ -89,7 +89,6 @@ class TermRepository implements ITermRepository
         /**
          * @link https://developer.wordpress.org/reference/functions/get_terms/
          */
-        var_dump($this->prepareForQuery($args));
         $terms = get_terms($this->prepareForQuery($args));
 
         if (is_wp_error($terms)) {
