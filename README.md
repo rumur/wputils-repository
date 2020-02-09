@@ -10,7 +10,7 @@
 <a name="repository-install"></a>
 ## Install Guide
 ```php
-composer require wputils/repository
+composer require rumur/wputils-repository
 ```
 <a name="how-to"></a>
 ## How to use?
