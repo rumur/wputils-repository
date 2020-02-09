@@ -1,0 +1,26 @@
+{
+    "name": "rumur/wputils-repository",
+    "description": "The WPUtils Repository package.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rumur",
+            "email": "rumur.dev@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1.3",
+        "rumur/wputils/contracts": "0.0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rumur\\WPUtils\\Repository\\": ""
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.0"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
