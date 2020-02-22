@@ -3,6 +3,10 @@
 namespace Rumur\WPUtils\Repository;
 
 use Rumur\WPUtils\Contracts\Repository\IPostRepository;
+use Rumur\WPUtils\Repository\Exception\InvalidPostType;
+use Rumur\WPUtils\Repository\Exception\PostNotCreated;
+use Rumur\WPUtils\Repository\Exception\PostNotFound;
+use Rumur\WPUtils\Repository\Exception\PostNotUpdated;
 use Rumur\WPUtils\Support\Collection;
 
 class PostRepository implements IPostRepository
@@ -25,13 +29,12 @@ class PostRepository implements IPostRepository
      *
      * @param string $post_type
      * @return static
+     * @throws InvalidPostType
      */
     public function usePostType(string $post_type)
     {
         if (!post_type_exists($post_type)) {
-            throw new \InvalidArgumentException(
-                sprintf('The `post_type` "%s" is incorrect', $post_type)
-            );
+            throw new InvalidPostType($post_type);
         }
 
         $this->post_type = $post_type;
@@ -96,10 +99,17 @@ class PostRepository implements IPostRepository
      *
      * @param int $id
      * @return mixed
+     * @throws PostNotFound
      */
     public function find(int $post_id)
     {
-        return $this->get(['post__in' => [$post_id], 'post_status' => 'any'])->first();
+        $found_post = $this->get(['post__in' => [$post_id], 'post_status' => 'any'])->first();
+
+        if (null === $found_post) {
+            throw PostNotFound::byId($post_id);
+        }
+
+        return $found_post;
     }
 
     /**
@@ -135,10 +145,11 @@ class PostRepository implements IPostRepository
     /**
      * @inheritdoc
      * @param array $data
-     * @return null|\WP_Post|mixed
-     * @throws \Throwable
+     * @return \WP_Post
+     * @throws PostNotCreated
+     * @throws PostNotFound
      */
-    public function create(array $data)
+    public function create(array $data): \WP_Post
     {
         try {
 
@@ -147,14 +158,13 @@ class PostRepository implements IPostRepository
             $post_id = wp_insert_post($prepared_data, true);
 
             if (is_wp_error($post_id)) {
-                throw new \RuntimeException($post_id->get_error_message());
+                throw new PostNotCreated($post_id->get_error_message());
             }
 
             $this->updateOrCreate($prepared_data, $post_id);
 
         } catch (\Throwable $e) {
-            error_log($e);
-            throw $e;
+            throw new PostNotCreated($e->getMessage());
         }
 
         return $this->find($post_id);
@@ -165,10 +175,11 @@ class PostRepository implements IPostRepository
      *
      * @param int $post_id
      * @param array $data
-     * @return mixed
-     * @throws \Throwable
+     * @return \WP_Post
+     * @throws PostNotUpdated
+     * @throws PostNotFound
      */
-    public function update(int $post_id, array $data)
+    public function update(int $post_id, array $data): \WP_Post
     {
         try {
 
@@ -179,14 +190,13 @@ class PostRepository implements IPostRepository
             $post_id = wp_update_post($prepared_data, true);
 
             if (is_wp_error($post_id)) {
-                throw new \RuntimeException($post_id->get_error_message());
+                throw new PostNotUpdated($post_id->get_error_message());
             }
 
             $this->updateOrCreate($prepared_data, $post_id);
 
         } catch (\Throwable $e) {
-            error_log($e);
-            throw $e;
+            throw new PostNotUpdated($e->getMessage());
         }
 
         return $this->find($post_id);
